@@ -1,6 +1,9 @@
-﻿/// <summary>
-/// AttackResult gives the result after a shot has been made.
-/// </summary>
+﻿
+using Microsoft.VisualBasic;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
 
 public partial class AttackResult
 {

@@ -1,10 +1,10 @@
 ﻿
-/// <summary>
-/// The AIMediumPlayer is a type of AIPlayer where it will try and destroy a ship
-/// if it has found a ship
-/// </summary>
+using Microsoft.VisualBasic;
 using System;
+using System.Collections;
 using System.Collections.Generic;
+//using System.Data;
+using System.Diagnostics;
 
 public partial class AIMediumPlayer : AIPlayer
 {
@@ -41,24 +41,18 @@ public partial class AIMediumPlayer : AIPlayer
             // method will be used.
             var switchExpr = _CurrentState;
             switch (switchExpr)
+            //check which state the AI is in and uppon that choose which coordinate generation
+            //method will be used.
+            switch (_CurrentState)
             {
                 case AIStates.Searching:
-                    {
-                        SearchCoords(ref row, ref column);
-                        break;
-                    }
-
+                    SearchCoords(ref row, ref column);
+                    break;
                 case AIStates.TargetingShip:
-                    {
-                        TargetCoords(ref row, ref column);
-                        break;
-                    }
-
+                    TargetCoords(ref row, ref column);
+                    break;
                 default:
-                    {
-                        throw new ApplicationException("AI has gone in an imvalid state");
-                        break;
-                    }
+                    throw new ApplicationException("AI has gone in an imvalid state");
             }
         }
         while (row < 0 || column < 0 || row >= EnemyGrid.Height || column >= EnemyGrid.Width || EnemyGrid.Item(row, column) != TileView.Sea);

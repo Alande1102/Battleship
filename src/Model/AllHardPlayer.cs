@@ -1,12 +1,16 @@
-﻿/// <summary>
+﻿using Microsoft.VisualBasic;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
+/// <summary>
 /// AIHardPlayer is a type of player. This AI will know directions of ships
 /// when it has found 2 ship tiles and will try to destroy that ship. If that ship
 /// is not destroyed it will shoot the other way. Ship still not destroyed, then
 /// the AI knows it has hit multiple ships. Then will try to destoy all around tiles
 /// that have been hit.
 /// </summary>
-using System;
-using System.Collections.Generic;
+
 
 public partial class AIHardPlayer : AIPlayer
 {
@@ -123,27 +127,17 @@ public partial class AIHardPlayer : AIPlayer
 
             // check which state the AI is in and uppon that choose which coordinate generation
             // method will be used.
-            var switchExpr = _CurrentState;
-            switch (switchExpr)
+            switch (_CurrentState)
             {
                 case AIStates.Searching:
-                    {
-                        SearchCoords(ref row, ref column);
-                        break;
-                    }
-
+                    SearchCoords(ref row, ref column);
+                    break;
                 case AIStates.TargetingShip:
                 case AIStates.HittingShip:
-                    {
-                        TargetCoords(ref row, ref column);
-                        break;
-                    }
-
+                    TargetCoords(ref row, ref column);
+                    break;
                 default:
-                    {
-                        throw new ApplicationException("AI has gone in an invalid state");
-                        break;
-                    }
+                    throw new ApplicationException("AI has gone in an invalid state");
             }
         }
         while (row < 0 || column < 0 || row >= EnemyGrid.Height || column >= EnemyGrid.Width || EnemyGrid.Item(row, column) != TileView.Sea);
@@ -176,7 +170,7 @@ public partial class AIHardPlayer : AIPlayer
     {
         row = _Random.Next(0, EnemyGrid.Height);
         column = _Random.Next(0, EnemyGrid.Width);
-        _CurrentTarget = new Target(new Location(row, column), default);
+        _CurrentTarget = new Target(new Location(row, column), null);
     }
 
     /// <summary>
@@ -188,32 +182,19 @@ public partial class AIHardPlayer : AIPlayer
     /// <param name="result">the result from that hit</param>
     protected override void ProcessShot(int row, int col, AttackResult result)
     {
-        var switchExpr = result.Value;
-        switch (switchExpr)
+        switch (result.Value)
         {
-            case var @case when @case == ResultOfAttack.Miss:
-                {
-                    _CurrentTarget = null;
-                    break;
-                }
-
-            case var case1 when case1 == ResultOfAttack.Hit:
-                {
-                    ProcessHit(row, col);
-                    break;
-                }
-
-            case var case2 when case2 == ResultOfAttack.Destroyed:
-                {
-                    ProcessDestroy(row, col, result.Ship);
-                    break;
-                }
-
-            case var case3 when case3 == ResultOfAttack.ShotAlready:
-                {
-                    throw new ApplicationException("Error in AI");
-                    break;
-                }
+            case ResultOfAttack.Miss:
+                _CurrentTarget = null;
+                break;
+            case ResultOfAttack.Hit:
+                ProcessHit(row, col);
+                break;
+            case ResultOfAttack.Destroyed:
+                ProcessDestroy(row, col, result.Ship);
+                break;
+            case ResultOfAttack.ShotAlready:
+                throw new ApplicationException("Error in AI");
         }
 
         if (_Targets.Count == 0)
@@ -229,9 +210,9 @@ public partial class AIHardPlayer : AIPlayer
     /// <param name="ship">the row that was shot at and destroyed</param>
     private void ProcessDestroy(int row, int col, Ship ship)
     {
-        bool foundOriginal;
-        Location source;
-        Target current;
+        bool foundOriginal = false;
+        Location source = null;
+        Target current = null;
         current = _CurrentTarget;
         foundOriginal = false;
 
@@ -281,14 +262,14 @@ public partial class AIHardPlayer : AIPlayer
     /// <param name="toRemove"></param>
     private void RemoveShotsAround(Location toRemove)
     {
-        var newStack = new Stack<Target>();  // create a new stack
+        Stack<Target> newStack = new Stack<Target>();  // create a new stack
 
         // check all targets in the _Targets stack
         foreach (Target t in _Targets)
         {
 
             // if the source of the target does not belong to the destroyed ship put them on the newStack
-            if (t.Source != toRemove)
+            if (!object.ReferenceEquals(t.Source, toRemove))
                 newStack.Push(t);
         }
 
@@ -364,9 +345,11 @@ public partial class AIHardPlayer : AIPlayer
     /// <param name="column">the column of the optimisation</param>
     private void MoveToTopOfStack(int row, int column)
     {
-        var _NoMatch = new Stack<Target>();
-        var _Match = new Stack<Target>();
-        Target current;
+        Stack<Target> _NoMatch = new Stack<Target>();
+        Stack<Target> _Match = new Stack<Target>();
+
+        Target current = null;
+
         while (_Targets.Count > 0)
         {
             current = _Targets.Pop();
@@ -381,9 +364,13 @@ public partial class AIHardPlayer : AIPlayer
         }
 
         foreach (Target t in _NoMatch)
+        {
             _Targets.Push(t);
+        }
         foreach (Target t in _Match)
+        {
             _Targets.Push(t);
+        }
     }
 
     /// <summary>

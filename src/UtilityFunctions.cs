@@ -1,9 +1,15 @@
-﻿/// <summary>
+﻿
+using System.Collections.Generic;
+using Microsoft.VisualBasic;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
+using SwinGameSDK;
+/// <summary>
 /// This includes a number of utility methods for
 /// drawing and interacting with the Mouse.
 /// </summary>
-using System.Collections.Generic;
-
 internal static partial class UtilityFunctions
 {
     public const int FIELD_TOP = 122;
@@ -40,7 +46,7 @@ internal static partial class UtilityFunctions
     /// <returns>true if the mouse is in the area checked</returns>
     public static bool IsMouseInRectangle(int x, int y, int w, int h)
     {
-        Point2D mouse;
+        Point2D mouse = default(Point2D);
         bool result = false;
         mouse = SwinGame.MousePosition();
 
@@ -103,8 +109,8 @@ internal static partial class UtilityFunctions
     {
         // SwinGame.FillRectangle(Color.Blue, left, top, width, height)
 
-        int rowTop;
-        int colLeft;
+        int rowTop = 0;
+        int colLeft = 0;
 
         // Draw the grid
         for (int row = 0; row <= 9; row++)
@@ -114,44 +120,30 @@ internal static partial class UtilityFunctions
             {
                 colLeft = left + (cellGap + cellWidth) * col;
                 var fillColor = default(Color);
-                bool draw;
+                bool draw = false;
                 draw = true;
-                var switchExpr = grid.Item(row, col);
-                switch (switchExpr)
+                switch (grid[row,col])
                 {
-                    case var @case when @case == TileView.Ship:
-                        {
-                            draw = false;
-                            break;
-                        }
                     // If small Then fillColor = _SMALL_SHIP Else fillColor = _LARGE_SHIP
-                    case var case1 when case1 == TileView.Miss:
-                        {
-                            if (small)
-                                fillColor = SMALL_MISS;
-                            else
-                                fillColor = LARGE_MISS;
-                            break;
-                        }
-
-                    case var case2 when case2 == TileView.Hit:
-                        {
-                            if (small)
-                                fillColor = SMALL_HIT;
-                            else
-                                fillColor = LARGE_HIT;
-                            break;
-                        }
-
-                    case var case3 when case3 == TileView.Sea:
-                    case var case4 when case4 == TileView.Ship:
-                        {
-                            if (small)
-                                fillColor = SMALL_SEA;
-                            else
-                                draw = false;
-                            break;
-                        }
+                    case TileView.Miss:
+                        if (small)
+                            fillColor = SMALL_MISS;
+                        else
+                            fillColor = LARGE_MISS;
+                        break;
+                    case TileView.Hit:
+                        if (small)
+                            fillColor = SMALL_HIT;
+                        else
+                            fillColor = LARGE_HIT;
+                        break;
+                    case TileView.Sea:
+                    case TileView.Ship:
+                        if (small)
+                            fillColor = SMALL_SEA;
+                        else
+                            draw = false;
+                        break;
                 }
 
                 if (draw)
@@ -242,33 +234,25 @@ internal static partial class UtilityFunctions
         var switchExpr = CurrentState;
         switch (switchExpr)
         {
-            case var @case when @case == GameState.ViewingMainMenu:
-            case var case1 when case1 == GameState.ViewingGameMenu:
-            case var case2 when case2 == GameState.AlteringSettings:
-            case var case3 when case3 == GameState.ViewingHighScores:
-                {
-                    SwinGame.DrawBitmap(GameImage["Menu"], 0, 0);
-                    break;
-                }
 
-            case var case4 when case4 == GameState.Discovering:
-            case var case5 when case5 == GameState.EndingGame:
-                {
-                    SwinGame.DrawBitmap(GameImage["Discovery"], 0, 0);
-                    break;
-                }
-
-            case var case6 when case6 == GameState.Deploying:
-                {
-                    SwinGame.DrawBitmap(GameImage["Deploy"], 0, 0);
-                    break;
-                }
-
+        switch (GameController.CurrentState)
+        {
+            case GameState.ViewingMainMenu:
+            case GameState.ViewingGameMenu:
+            case GameState.AlteringSettings:
+            case GameState.ViewingHighScores:
+                SwinGame.DrawBitmap(GameResources.GameImage("Menu"), 0, 0);
+                break;
+            case GameState.Discovering:
+            case GameState.EndingGame:
+                SwinGame.DrawBitmap(GameResources.GameImage("Discovery"), 0, 0);
+                break;
+            case GameState.Deploying:
+                SwinGame.DrawBitmap(GameResources.GameImage("Deploy"), 0, 0);
+                break;
             default:
-                {
-                    SwinGame.ClearScreen();
-                    break;
-                }
+                SwinGame.ClearScreen();
+                break;
         }
 
         SwinGame.DrawFramerate(675, 585);
@@ -288,15 +272,19 @@ internal static partial class UtilityFunctions
 
     private static void AddAnimation(int row, int col, string image)
     {
-        Sprite s;
-        Bitmap imgObj;
-        imgObj = GameImage[image];
+        Sprite s = default(Sprite);
+        Bitmap imgObj = default(Bitmap);
+
+        imgObj = GameResources.GameImage(image);
         imgObj.SetCellDetails(40, 40, 3, 3, 7);
-        AnimationScript animation;
+
+        AnimationScript animation = default(AnimationScript);
         animation = SwinGame.LoadAnimationScript("splash.txt");
+
         s = SwinGame.CreateSprite(imgObj, animation);
         s.X = FIELD_LEFT + col * (CELL_WIDTH + CELL_GAP);
         s.Y = FIELD_TOP + row * (CELL_HEIGHT + CELL_GAP);
+
         s.StartAnimation("splash");
         _Animations.Add(s);
     }
@@ -332,7 +320,7 @@ internal static partial class UtilityFunctions
         for (i = 1; i <= ANIMATION_CELLS * FRAMES_PER_CELL; i++)
         {
             UpdateAnimations();
-            DrawScreen();
+            GameController.DrawScreen();
         }
     }
 }

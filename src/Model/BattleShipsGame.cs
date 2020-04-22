@@ -1,10 +1,15 @@
-﻿/// <summary>
+﻿
+using Microsoft.VisualBasic;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
+/// <summary>
 /// The BattleShipsGame controls a big part of the game. It will add the two players
 /// to the game and make sure that both players ships are all deployed before starting the game.
 /// It also allows players to shoot and swap turns between player. It will also check if players
 /// are destroyed.
 /// </summary>
-using System;
 
 public partial class BattleShipsGame
 {

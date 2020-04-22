@@ -1,14 +1,13 @@
-﻿/// <summary>
+﻿
+using Microsoft.VisualBasic;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
+using SwinGameSDK;
+/// <summary>
 /// The different AI levels.
 /// </summary>
-
-public enum AIOption
-{
-    /// <summary>
-    /// Easy, total random shooting/// <summary>
-    /// The AIPlayer is a type of player. It can readomly deploy ships, it also has the
-    /// functionality to generate coordinates and shoot at tiles
-    /// </summary>
 
 public abstract partial class AIPlayer : Player
 {
@@ -77,7 +76,7 @@ public abstract partial class AIPlayer : Player
         /// <returns>true if location 1 and location 2 are at the same spot</returns>
         public static bool operator ==(Location @this, Location other)
         {
-            return @this is object && other is object && @this.Row == other.Row && @this.Column == other.Column;
+            return !ReferenceEquals(@this, null) && !ReferenceEquals(other, null) && @this.Row == other.Row && @this.Column == other.Column;
         }
 
         /// <summary>
@@ -88,7 +87,7 @@ public abstract partial class AIPlayer : Player
         /// <returns>true if location 1 and location 2 are not at the same spot</returns>
         public static bool operator !=(Location @this, Location other)
         {
-            return @this is null || other is null || @this.Row != other.Row || @this.Column != other.Column;
+            return ReferenceEquals(@this, null) || ReferenceEquals(other, null) || @this.Row != other.Row || @this.Column != other.Column;
         }
     }
 
@@ -148,17 +147,4 @@ public abstract partial class AIPlayer : Player
             SwinGame.RefreshScreen();
         }
     }
-}
-/// </summary>
-Easy,
-
-    /// <summary>
-    /// Medium, marks squares around hits
-    /// </summary>
-    Medium,
-
-    /// <summary>
-    /// As medium, but removes shots once it misses
-    /// </summary>
-    Hard
 }

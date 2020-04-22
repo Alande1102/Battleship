@@ -1,4 +1,9 @@
-﻿using SwinGameSDK;
+﻿using Microsoft.VisualBasic;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
+using SwinGameSDK;
 
 /// <summary>
 /// The menu controller handles the drawing and user interactions
@@ -15,7 +20,22 @@ internal static partial class MenuController
     /// <remarks>
     /// These are the text captions for the menu items.
     /// </remarks>
-    private readonly static string[][] _menuStructure = new[] { new string[] { "PLAY", "SETUP", "SCORES", "QUIT" }, new string[] { "RETURN", "SURRENDER", "QUIT" }, new string[] { "EASY", "MEDIUM", "HARD" } };
+    private static readonly string[][] _menuStructure = 
+        {
+            new string[] {
+                "PLAY",
+                "SETUP",
+                "SCORES",
+                "QUIT" },
+            new string[] {
+                "RETURN",
+                "SURRENDER",
+                "QUIT" },
+            new string[] {
+                "EASY",
+                "MEDIUM",
+                "HARD" } 
+        };
 
 
     private const int MENU_TOP = 575;
@@ -55,7 +75,7 @@ internal static partial class MenuController
     /// </summary>
     public static void HandleSetupMenuInput()
     {
-        bool handled;
+        bool handled = false;
         handled = HandleMenuInput(SETUP_MENU, 1, 1);
         if (!handled)
         {
@@ -85,15 +105,14 @@ internal static partial class MenuController
     {
         if (SwinGame.KeyTyped(KeyCode.VK_ESCAPE))
         {
-            EndCurrentState();
+            GameController.EndCurrentState();
             return true;
         }
 
         if (SwinGame.MouseClicked(MouseButton.LeftButton))
         {
-            int i;
-            var loopTo = _menuStructure[menu].Length - 1;
-            for (i = 0; i <= loopTo; i++)
+            int i = 0;
+            for (i = 0; i <= _menuStructure[menu].Length - 1; i++)
             {
                 // IsMouseOver the i'th button of the menu
                 if (IsMouseOverMenu(i, level, xOffset))
@@ -106,7 +125,7 @@ internal static partial class MenuController
             if (level > 0)
             {
                 // none clicked - so end this sub menu
-                EndCurrentState();
+                GameController.EndCurrentState();
             }
         }
 
@@ -172,21 +191,16 @@ internal static partial class MenuController
     /// </remarks>
     private static void DrawButtons(int menu, int level, int xOffset)
     {
-        int btnTop;
-        var toDraw = default(Rectangle);
+        int btnTop = 0;
+
         btnTop = MENU_TOP - (MENU_GAP + BUTTON_HEIGHT) * level;
-        int i;
-        var loopTo = _menuStructure[menu].Length - 1;
-        for (i = 0; i <= loopTo; i++)
+        int i = 0;
+        for (i = 0; i <= _menuStructure[menu].Length - 1; i++)
         {
-            int btnLeft;
+            int btnLeft = 0;
             btnLeft = MENU_LEFT + BUTTON_SEP * (i + xOffset);
             // SwinGame.FillRectangle(Color.White, btnLeft, btnTop, BUTTON_WIDTH, BUTTON_HEIGHT)
-            toDraw.X = btnLeft + TEXT_OFFSET;
-            toDraw.Y = btnTop + TEXT_OFFSET;
-            toDraw.Width = BUTTON_WIDTH;
-            toDraw.Height = BUTTON_HEIGHT;
-            SwinGame.DrawTextLines(_menuStructure[menu][i], MENU_COLOR, Color.Black, GameFont["Menu"], FontAlignment.AlignCenter, toDraw);
+            SwinGame.DrawTextLines(_menuStructure[menu][i], MENU_COLOR, Color.Black, GameResources.GameFont("Menu"), FontAlignment.AlignCenter, btnLeft + TEXT_OFFSET, btnTop + TEXT_OFFSET, BUTTON_WIDTH, BUTTON_HEIGHT);
             if (SwinGame.MouseDown(MouseButton.LeftButton) & IsMouseOverMenu(i, level, xOffset))
             {
                 SwinGame.DrawRectangle(HIGHLIGHT_COLOR, btnLeft, btnTop, BUTTON_WIDTH, BUTTON_HEIGHT);
@@ -215,7 +229,7 @@ internal static partial class MenuController
     {
         int btnTop = MENU_TOP - (MENU_GAP + BUTTON_HEIGHT) * level;
         int btnLeft = MENU_LEFT + BUTTON_SEP * (button + xOffset);
-        return IsMouseInRectangle[btnLeft, btnTop, BUTTON_WIDTH, BUTTON_HEIGHT];
+        return UtilityFunctions.IsMouseInRectangle(btnLeft, btnTop, BUTTON_WIDTH, BUTTON_HEIGHT);
     }
 
     /// <summary>
@@ -228,22 +242,14 @@ internal static partial class MenuController
         switch (menu)
         {
             case MAIN_MENU:
-                {
                     PerformMainMenuAction(button);
                     break;
-                }
-
             case SETUP_MENU:
-                {
                     PerformSetupMenuAction(button);
                     break;
-                }
-
             case GAME_MENU:
-                {
                     PerformGameMenuAction(button);
                     break;
-                }
         }
     }
 
@@ -256,28 +262,17 @@ internal static partial class MenuController
         switch (button)
         {
             case MAIN_MENU_PLAY_BUTTON:
-                {
-                    StartGame();
-                    break;
-                }
-
+                 GameController.StartGame();
+                 break;
             case MAIN_MENU_SETUP_BUTTON:
-                {
-                    AddNewState[GameState.AlteringSettings];
-                    break;
-                }
-
+                 GameController.AddNewState(GameState.AlteringSettings);
+                 break;
             case MAIN_MENU_TOP_SCORES_BUTTON:
-                {
-                    AddNewState[GameState.ViewingHighScores];
-                    break;
-                }
-
+                 GameController.AddNewState(GameState.ViewingHighScores);
+                 break;
             case MAIN_MENU_QUIT_BUTTON:
-                {
-                    EndCurrentState();
-                    break;
-                }
+                 GameController.EndCurrentState();
+                 break;
         }
     }
 
@@ -290,25 +285,17 @@ internal static partial class MenuController
         switch (button)
         {
             case SETUP_MENU_EASY_BUTTON:
-                {
-                    SetDifficulty[AIOption.Hard];
+                GameController.SetDifficulty(AIOption.Hard);
                     break;
-                }
-
             case SETUP_MENU_MEDIUM_BUTTON:
-                {
-                    SetDifficulty[AIOption.Hard];
+                GameController.SetDifficulty(AIOption.Hard);
                     break;
-                }
-
             case SETUP_MENU_HARD_BUTTON:
-                {
-                    SetDifficulty[AIOption.Hard];
+                GameController.SetDifficulty(AIOption.Hard);
                     break;
-                }
         }
         // Always end state - handles exit button as well
-        EndCurrentState();
+        GameController.EndCurrentState();
     }
 
     /// <summary>
@@ -320,23 +307,15 @@ internal static partial class MenuController
         switch (button)
         {
             case GAME_MENU_RETURN_BUTTON:
-                {
-                    EndCurrentState();
+                GameController.EndCurrentState();
                     break;
-                }
-
             case GAME_MENU_SURRENDER_BUTTON:
-                {
-                    EndCurrentState(); // end game menu
-                    EndCurrentState(); // end game
+                GameController.EndCurrentState(); // end game menu
+                GameController.EndCurrentState(); // end game
                     break;
-                }
-
             case GAME_MENU_QUIT_BUTTON:
-                {
-                    AddNewState[GameState.Quitting];
+                GameController.AddNewState(GameState.Quitting);
                     break;
-                }
         }
     }
 }

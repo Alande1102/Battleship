@@ -1,9 +1,13 @@
-﻿using System;
+﻿using Microsoft.VisualBasic;
+using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using SwinGameSDK;
 
 public static partial class GameResources
 {
+
     private static void LoadFonts()
     {
         NewFont("ArialLarge", "arial.ttf", 80);
@@ -27,7 +31,7 @@ public static partial class GameResources
         NewImage("RandomButton", "deploy_randomize_button.png");
 
         // Ships
-        int i;
+        int i = 0;
         for (i = 1; i <= 5; i++)
         {
             NewImage("ShipLR" + i, "ship_deploy_horiz_" + i + ".png");
@@ -156,13 +160,21 @@ public static partial class GameResources
 
     private static void PlaySwinGameIntro()
     {
+        const int ANI_X = 143;
+        const int ANI_Y = 134;
+        const int ANI_W = 546;
+        const int ANI_H = 327;
+        const int ANI_V_CELL_COUNT = 6;
         const int ANI_CELL_COUNT = 11;
+
         Audio.PlaySoundEffect(_StartSound);
         SwinGame.Delay(200);
-        int i;
+
+        int i = 0;
         for (i = 0; i <= ANI_CELL_COUNT - 1; i++)
         {
             SwinGame.DrawBitmap(_Background, 0, 0);
+            SwinGame.DrawBitmapPart(_Animation, (i / ANI_V_CELL_COUNT) * ANI_W, (i % ANI_V_CELL_COUNT) * ANI_H, ANI_W, ANI_H, ANI_X, ANI_Y);
             SwinGame.Delay(20);
             SwinGame.RefreshScreen();
             SwinGame.ProcessEvents();
@@ -180,19 +192,14 @@ public static partial class GameResources
         const int STEPS = 5;
         const int BG_X = 279;
         const int BG_Y = 453;
-        int fullW;
-        var toDraw = default(Rectangle);
+
+        int fullW = 0;
+
         fullW = 260 * number / STEPS;
         SwinGame.DrawBitmap(_LoaderEmpty, BG_X, BG_Y);
-        SwinGame.DrawCell(_LoaderFull, 0, BG_X, BG_Y);
-        // SwinGame.DrawBitmapPart(_LoaderFull, 0, 0, fullW, 66, BG_X, BG_Y)
+        SwinGame.DrawBitmapPart(_LoaderFull, 0, 0, fullW, 66, BG_X, BG_Y);
 
-        toDraw.X = TX;
-        toDraw.Y = TY;
-        toDraw.Width = TW;
-        toDraw.Height = TH;
-        SwinGame.DrawTextLines(message, Color.White, Color.Transparent, _LoadingFont, FontAlignment.AlignCenter, toDraw);
-        // SwinGame.DrawTextLines(message, Color.White, Color.Transparent, _LoadingFont, FontAlignment.AlignCenter, TX, TY, TW, TH)
+       SwinGame.DrawTextLines(message, Color.White, Color.Transparent, _LoadingFont, FontAlignment.AlignCenter, TX, TY, TW, TH);
 
         SwinGame.RefreshScreen();
         SwinGame.ProcessEvents();
@@ -245,29 +252,25 @@ public static partial class GameResources
 
     private static void FreeFonts()
     {
-        Font obj;
-        foreach (var obj in _Fonts.Values)
+        foreach (Font obj in _Fonts.Values)
             SwinGame.FreeFont(obj);
     }
 
     private static void FreeImages()
     {
-        Bitmap obj;
-        foreach (var obj in _Images.Values)
+        foreach (Bitmap obj in _Images.Values)
             SwinGame.FreeBitmap(obj);
     }
 
     private static void FreeSounds()
     {
-        SoundEffect obj;
-        foreach (var obj in _Sounds.Values)
+        foreach (SoundEffect obj in _Sounds.Values)
             Audio.FreeSoundEffect(obj);
     }
 
     private static void FreeMusic()
     {
-        Music obj;
-        foreach (var obj in _Music.Values)
+        foreach (Music obj in _Music.Values)
             Audio.FreeMusic(obj);
     }
 

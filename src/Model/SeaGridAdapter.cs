@@ -1,4 +1,12 @@
-﻿/// <summary>
+using Microsoft.VisualBasic;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
+
+
+
+/// <summary>
 /// The SeaGridAdapter allows for the change in a sea grid view. Whenever a ship is
 /// presented it changes the view into a sea tile instead of a ship tile.
 /// </summary>
@@ -12,6 +20,7 @@ public partial class SeaGridAdapter : ISeaGrid
     /// Create the SeaGridAdapter, with the grid, and it will allow it to be changed
     /// </summary>
     /// <param name="grid">the grid that needs to be adapted</param>
+
     public SeaGridAdapter(SeaGrid grid)
     {
         _MyGrid = grid;
@@ -25,8 +34,13 @@ public partial class SeaGridAdapter : ISeaGrid
     /// <param name="e">what needs to be redrawn</param>
     private void MyGrid_Changed(object sender, EventArgs e)
     {
-        Changed?.Invoke(this, e);
+        if (Changed != null) 
+        {
+            Changed(this, e);
+        }
     }
+
+    #region "ISeaGrid Members"
 
     /* TODO ERROR: Skipped RegionDirectiveTrivia */
     /// <summary>
@@ -35,18 +49,17 @@ public partial class SeaGridAdapter : ISeaGrid
     /// <param name="x">tile x coordinate</param>
     /// <param name="y">tile y coordinate</param>
     /// <returns>a tile, either what it actually is, or if it was a ship then return a sea tile</returns>
-    public TileView get_Item(int x, int y)
-    {
-        TileView result = _MyGrid.Item(x, y);
-        if (result == TileView.Ship)
-        {
-            return TileView.Sea;
-        }
-        else
-        {
-            return result;
-        }
-    }
+    public TileView this[int x, int y] {
+		get {
+			TileView result = _MyGrid[x, y];
+
+			if (result == TileView.Ship) {
+				return TileView.Sea;
+			} else {
+				return result;
+			}
+		}
+	}
 
     /// <summary>
     /// Indicates that the grid has been changed
@@ -85,5 +98,7 @@ public partial class SeaGridAdapter : ISeaGrid
     {
         return _MyGrid.HitTile(row, col);
     }
+
+    #endregion
     /* TODO ERROR: Skipped EndRegionDirectiveTrivia */
 }

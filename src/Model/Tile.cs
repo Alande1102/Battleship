@@ -1,4 +1,10 @@
-﻿/// <summary>
+using Microsoft.VisualBasic;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
+
+/// <summary>
 /// Tile knows its location on the grid, if it is a ship and if it has been
 /// shot before
 /// </summary>
@@ -8,7 +14,7 @@ public partial class Tile
 {
     private readonly int _RowValue;        // the row value of the tile
     private readonly int _ColumnValue;     // the column value of the tile
-    private Ship _Ship = default;     // the ship the tile belongs to
+    private Ship _Ship = null;     // the ship the tile belongs to
     private bool _Shot = false;    // the tile has been shot at
 
     /// <summary>
@@ -108,32 +114,27 @@ public partial class Tile
     /// </summary>
     public TileView View
     {
-        get
-        {
-            // if there is no ship in the tile
-            if (_Ship is null)
-            {
-                // and the tile has been hit
-                if (_Shot)
-                {
-                    return TileView.Miss;
-                }
-                else
-                {
-                    // and the tile hasn't been hit
-                    return TileView.Sea;
-                }
-            }
-            // if there is a ship and it has been hit
-            else if (_Shot)
-            {
-                return TileView.Hit;
-            }
-            else
-            {
-                // if there is a ship and it hasn't been hit
-                return TileView.Ship;
-            }
+       		get {
+			//if there is no ship in the tile
+			if (_Ship == null) {
+				//and the tile has been hit
+
+				if (_Shot) {
+					return TileView.Miss;
+				} else {
+					//and the tile hasn't been hit
+					return TileView.Sea;
+				}
+			} else {
+				//if there is a ship and it has been hit
+				if ((_Shot)) {
+					return TileView.Hit;
+				} else {
+					//if there is a ship and it hasn't been hit
+					return TileView.Ship;
+				}
+			}
+    
         }
     }
 
@@ -143,17 +144,13 @@ public partial class Tile
     /// </summary>
     internal void Shoot()
     {
-        if (false == Shot)
-        {
-            Shot = true;
-            if (_Ship is object)
-            {
-                _Ship.Hit();
-            }
-        }
-        else
-        {
-            throw new ApplicationException("You have already shot this square");
-        }
-    }
+		if ((false == Shot)) {
+			Shot = true;
+			if (_Ship != null) {
+				_Ship.Hit();
+			}
+		} else {
+			throw new ApplicationException("You have already shot this square");
+		}
+	}
 }

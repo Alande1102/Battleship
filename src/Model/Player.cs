@@ -1,7 +1,4 @@
-﻿/// <summary>
-/// Player has its own _PlayerGrid, and can see an _EnemyGrid, it can also check if
-/// all ships are deployed and if all ships are detroyed. A Player can also attach.
-/// </summary>
+using Microsoft.VisualBasic;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -50,6 +47,7 @@ public partial class Player : IEnumerable<Ship>
     public Player(BattleShipsGame controller)
     {
         _game = controller;
+        _playerGrid = new SeaGrid(_Ships);
 
         // for each ship add the ships name so the seagrid knows about them
         foreach (ShipName name in Enum.GetValues(typeof(ShipName)))
@@ -120,7 +118,7 @@ public partial class Player : IEnumerable<Ship>
     public Ship get_Ship(ShipName name)
     {
         if (name == ShipName.None)
-            return default;
+            return null;
         return this._Ships(name);
     }
 
@@ -168,7 +166,7 @@ public partial class Player : IEnumerable<Ship>
             }
             else
             {
-                return Hits * 12 - Shots - PlayerGrid.ShipsKilled * 20;
+                return (Hits * 12) - Shots - (PlayerGrid.ShipsKilled * 20);
             }
         }
     }
@@ -180,12 +178,17 @@ public partial class Player : IEnumerable<Ship>
     /// <returns>A Ship enumerator</returns>
     public IEnumerator<Ship> GetShipEnumerator()
     {
-        var result = new Ship[_Ships.Values.Count + 1];
-        _Ships.Values.CopyTo(result, 0);
-        var lst = new List<Ship>();
-        lst.AddRange(result);
-        return lst.GetEnumerator();
-    }
+		Ship[] result = new Ship[_Ships.Values.Count + 1];
+		_Ships.Values.CopyTo(result, 0);
+		List<Ship> lst = new List<Ship>();
+		lst.AddRange(result);
+
+		return lst.GetEnumerator();
+	}
+    IEnumerator<Ship> IEnumerable<Ship>.GetEnumerator()
+	{
+		return GetShipEnumerator();
+	}
 
     /// <summary>
     /// Makes it possible to enumerate over the ships the player
@@ -198,6 +201,7 @@ public partial class Player : IEnumerable<Ship>
         _Ships.Values.CopyTo(result, 0);
         var lst = new List<Ship>();
         lst.AddRange(result);
+
         return lst.GetEnumerator();
     }
 
@@ -207,7 +211,7 @@ public partial class Player : IEnumerable<Ship>
     public virtual AttackResult Attack()
     {
         // human does nothing here...
-        return default;
+        return null;
     }
 
     /// <summary>
@@ -216,70 +220,66 @@ public partial class Player : IEnumerable<Ship>
     /// <param name="row">the row to attack</param>
     /// <param name="col">the column to attack</param>
     /// <returns>the result of the attack</returns>
+
+    public virtual AttackResult Attack()
+	{
+		//human does nothing here...
+		return null;
+	}
+
     internal AttackResult Shoot(int row, int col)
-    {
-        _shots += 1;
-        AttackResult result;
-        result = EnemyGrid.HitTile(row, col);
-        var switchExpr = result.Value;
-        switch (switchExpr)
-        {
-            case var @case when @case == ResultOfAttack.Destroyed:
-            case var case1 when case1 == ResultOfAttack.Hit:
-                {
-                    _hits += 1;
-                    break;
-                }
+	{
+		_shots += 1;
+		AttackResult result = default(AttackResult);
+		result = EnemyGrid.HitTile(row, col);
 
-            case var case2 when case2 == ResultOfAttack.Miss:
-                {
-                    _misses += 1;
-                    break;
-                }
-        }
+		switch (result.Value) {
+			case ResultOfAttack.Destroyed:
+			case ResultOfAttack.Hit:
+				_hits += 1;
+				break;
+			case ResultOfAttack.Miss:
+				_misses += 1;
+				break;
+		}
 
-        return result;
-    }
+		return result;
+	}
 
     public virtual void RandomizeDeployment()
-    {
-        bool placementSuccessful;
-        Direction heading;
+	{
+		bool placementSuccessful = false;
+		Direction heading = default(Direction);
 
-        // for each ship to deploy in shipist
-        foreach (ShipName shipToPlace in Enum.GetValues(typeof(ShipName)))
-        {
-            if (shipToPlace == ShipName.None)
-                continue;
-            placementSuccessful = false;
+		//for each ship to deploy in shipist
 
-            // generate random position until the ship can be placed
-            do
-            {
-                int dir = _Random.Next(2);
-                int x = _Random.Next(0, 11);
-                int y = _Random.Next(0, 11);
-                if (dir == 0)
-                {
-                    heading = Direction.UpDown;
-                }
-                else
-                {
-                    heading = Direction.LeftRight;
-                }
+		foreach (ShipName shipToPlace in Enum.GetValues(typeof(ShipName))) {
+			if (shipToPlace == ShipName.None)
+				continue;
 
-                // try to place ship, if position unplaceable, generate new coordinates
-                try
-                {
-                    PlayerGrid.MoveShip(x, y, shipToPlace, heading);
-                    placementSuccessful = true;
-                }
-                catch
-                {
-                    placementSuccessful = false;
-                }
-            }
-            while (!placementSuccessful);
-        }
-    }
+			placementSuccessful = false;
+
+			//generate random position until the ship can be placed
+			do {
+				int dir = _Random.Next(2);
+				int x = _Random.Next(0, 11);
+				int y = _Random.Next(0, 11);
+
+
+				if (dir == 0) {
+					heading = Direction.UpDown;
+				} else {
+					heading = Direction.LeftRight;
+				}
+
+				//try to place ship, if position unplaceable, generate new coordinates
+				try {
+					PlayerGrid.MoveShip(x, y, shipToPlace, heading);
+					placementSuccessful = true;
+				} catch {
+					placementSuccessful = false;
+				}
+			} while (!placementSuccessful);
+		}
+	}
 }
